@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Globalization;
 using System.IO.Ports;
 using System.Text;
 using System.Threading;
 
 namespace Bev.Instruments.ND281
 {
-    // basic functionality to retrieve values from the Heidenhain ND281B display
+    // Basic functionality to retrieve values from the Heidenhain ND281B display
     // Benutzerhandbuch 6/2000
     public class ND281
     {
@@ -36,7 +37,8 @@ namespace Bev.Instruments.ND281
 
         private double ParseResponse(string lastResponse)
         {
-            if(lastResponse.Length < 11) // actually 17?
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            if (lastResponse.Length < 11) // actually 17?
                 return double.NaN;
             double sign = 1;
             string sSign = lastResponse.Substring(0, 1);
