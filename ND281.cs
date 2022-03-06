@@ -11,9 +11,8 @@ namespace Bev.Instruments.ND281
     public class ND281
     {
         private readonly SerialPort comPort;    // this must not be static!
-        private static byte CtrlB = 0x02;       //
-        private static int delayTime = 50;      // delay time between send and read, in ms
-        private bool debugFlag = false;
+        private static int delayTime = 100;     // delay time between send and read, in ms
+        private bool debugFlag = false;         // once working, discard
 
         public ND281(string portName)
         {
@@ -48,26 +47,31 @@ namespace Bev.Instruments.ND281
             return ParseResponse(LastResponse);
         }
 
-        private double ParseResponse(string lastResponse)
+        private double ParseResponse(string response)
         {
             CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-            if (lastResponse.Length < 11) // actually 17?
+            if (response.Length < 11) // actually 17?
                 return double.NaN;
             double sign = 1;
-            string sSign = lastResponse.Substring(0, 1);
+            string sSign = response.Substring(0, 1);
             if (sSign == "-")
                 sign = -1;
-            string sValue = lastResponse.Substring(1, 10);
-            if(double.TryParse(sValue, out double value)) 
-                return sign*value;
+            string sValue = response.Substring(1, 10);
+            if (double.TryParse(sValue, out double value))
+                return sign * value;
             return double.NaN;
         }
+
+        private static byte CtrlB = 0x02;
+        private static byte CR = 0x13;
+        private static byte LF = 0x10;
 
         private string Query()
         {
             byte[] command = new byte[1];
             command[0] = CtrlB;
             OpenPort();
+            Thread.Sleep(delayTime);    // TODO really?
             SendSerialBus(command);
             Thread.Sleep(delayTime);
             byte[] buffer = ReadSerialBus();
