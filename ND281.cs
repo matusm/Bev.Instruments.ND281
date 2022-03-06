@@ -39,7 +39,11 @@ namespace Bev.Instruments.ND281
 
         public double GetValue()
         {
-            if (debugFlag) return 31.1415926;
+            if (debugFlag) 
+            {
+                Thread.Sleep(delayTime);
+                return 31.1415926; 
+            }
             LastResponse = Query();
             return ParseResponse(LastResponse);
         }
