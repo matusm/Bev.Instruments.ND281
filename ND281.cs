@@ -75,8 +75,10 @@ namespace Bev.Instruments.ND281
                 if (!comPort.IsOpen)
                     comPort.Open();
             }
-            catch (Exception)
-            { }
+            catch (Exception e)
+            {
+                Console.WriteLine($"****OpenPort -> {e.Message}");
+            }
         }
 
         private void SendSerialBus(byte[] command)
