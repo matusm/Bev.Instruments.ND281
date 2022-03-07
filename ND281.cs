@@ -18,9 +18,9 @@ namespace Bev.Instruments.ND281
             LastResponse = string.Empty;
             DevicePort = portName.Trim();
             comPort = new SerialPort(DevicePort, 9600, Parity.Even, 7, StopBits.Two);
-            comPort.Handshake = Handshake.XOnXOff;
-            comPort.RtsEnable = false;
-            comPort.DtrEnable = false;
+            comPort.Handshake = Handshake.RequestToSend;
+            comPort.RtsEnable = true;
+            comPort.DtrEnable = true;
         }
 
         public string DevicePort { get; }
