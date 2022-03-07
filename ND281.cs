@@ -12,22 +12,14 @@ namespace Bev.Instruments.ND281
     {
         private readonly SerialPort comPort;    // this must not be static!
         private static int delayTime = 100;     // delay time between send and read, in ms
-        private bool debugFlag = false;         // once working, discard
 
         public ND281(string portName)
         {
             LastResponse = string.Empty;
             DevicePort = portName.Trim();
-            if (DevicePort == "debug")
-            {
-                debugFlag = true;
-            }
-            else
-            {
                 comPort = new SerialPort(DevicePort, 9600, Parity.Even, 7, StopBits.Two);
                 comPort.RtsEnable = false;   // ?
                 comPort.DtrEnable = false;	// ?
-            }
         }
 
         public string DevicePort { get; }
@@ -38,11 +30,6 @@ namespace Bev.Instruments.ND281
 
         public double GetValue()
         {
-            if (debugFlag) 
-            {
-                Thread.Sleep(delayTime);
-                return 31.1415926; 
-            }
             LastResponse = Query();
             return ParseResponse(LastResponse);
         }
