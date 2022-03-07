@@ -25,8 +25,8 @@ namespace Bev.Instruments.ND281
             else
             {
                 comPort = new SerialPort(DevicePort, 9600, Parity.Even, 7, StopBits.Two);
-                comPort.RtsEnable = true;   // ?
-                comPort.DtrEnable = true;	// ?
+                comPort.RtsEnable = false;   // ?
+                comPort.DtrEnable = false;	// ?
             }
         }
 
