@@ -10,8 +10,8 @@ namespace Bev.Instruments.ND281
     // Benutzerhandbuch 6/2000
     public class ND281
     {
-        private readonly SerialPort comPort;    // this must not be static!
-        private static int delayTime = 50;      // delay time between send and read, in ms
+        private readonly SerialPort comPort;
+        private static int delayTime = 200;     // delay time between send and read, in ms
 
         public ND281(string portName)
         {
@@ -55,10 +55,10 @@ namespace Bev.Instruments.ND281
 
         private string Query()
         {
-            byte[] command = new byte[3];
+            byte[] command = new byte[1];
             command[0] = CtrlB;
-            command[1] = CR;
-            command[2] = LF;
+            //command[1] = CR;
+            //command[2] = LF;
             OpenPort();
             Thread.Sleep(delayTime);    // TODO really?
             SendSerialBus(command);
@@ -66,19 +66,6 @@ namespace Bev.Instruments.ND281
             byte[] buffer = ReadSerialBus();
             string s = Encoding.ASCII.GetString(buffer, 0, buffer.Length);
             return s;
-        }
-
-        private void OpenPort()
-        {
-            try
-            {
-                if (!comPort.IsOpen)
-                    comPort.Open();
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine($"****OpenPort -> {e.Message}");
-            }
         }
 
         private void SendSerialBus(byte[] command)
@@ -109,5 +96,17 @@ namespace Bev.Instruments.ND281
             }
         }
 
+        private void OpenPort()
+        {
+            try
+            {
+                if (!comPort.IsOpen)
+                    comPort.Open();
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine($"****OpenPort -> {e.Message}");
+            }
+        }
     }
 }
