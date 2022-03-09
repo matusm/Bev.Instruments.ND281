@@ -26,7 +26,7 @@ namespace Bev.Instruments.ND281
 
         public string DevicePort { get; }
         public string InstrumentManufacturer => "Heidenhain";
-        public string InstrumentType => "ND 281 B";
+        public string InstrumentType => "ND281/ND280";
         public string InstrumentID => $"{InstrumentManufacturer} {InstrumentType} @ {DevicePort}";
         public string LastResponse { get; private set; } // for debuging only, make private when working
 
@@ -54,20 +54,37 @@ namespace Bev.Instruments.ND281
         private static byte CtrlB = 0x02;
         private static byte CR = 0x13;
         private static byte LF = 0x10;
+        private static byte ESC = 0x1B;
 
         private string Query()
         {
-            byte[] command = new byte[1];
-            command[0] = CtrlB;
-            //command[1] = CR;
-            //command[2] = LF;
             OpenPort();
             Thread.Sleep(delayTime);    // TODO really?
-            SendSerialBus(command);
+            SendSerialBus(GenericCommand());
             Thread.Sleep(delayTime);
             byte[] buffer = ReadSerialBus();
             string str = Encoding.ASCII.GetString(buffer, 0, buffer.Length);
             return RemoveCrLfFromString(str);
+        }
+
+        private byte[] GenericCommand()
+        {
+            byte[] command = new byte[1];
+            command[0] = CtrlB;
+            return command;
+        }
+
+        private byte[] RemoteACommand()
+        {
+            byte[] command = new byte[7];
+            command[0] = ESC;
+            command[1] = 0x41;
+            command[2] = 0x30;
+            command[3] = 0x30;
+            command[4] = 0x30;
+            command[5] = 0x30;
+            command[6] = CR;
+            return command;
         }
 
         private string RemoveCrLfFromString(string str)
