@@ -8,6 +8,7 @@ namespace Bev.Instruments.ND281
 {
     // Basic functionality to retrieve values from the Heidenhain ND281B display
     // Benutzerhandbuch 6/2000
+    // works ND280 too!
     public class ND281
     {
         private readonly SerialPort comPort;
@@ -65,8 +66,15 @@ namespace Bev.Instruments.ND281
             SendSerialBus(command);
             Thread.Sleep(delayTime);
             byte[] buffer = ReadSerialBus();
-            string s = Encoding.ASCII.GetString(buffer, 0, buffer.Length);
-            return s;
+            string str = Encoding.ASCII.GetString(buffer, 0, buffer.Length);
+            return RemoveCrLfFromString(str);
+        }
+
+        private string RemoveCrLfFromString(string str)
+        {
+            if (string.IsNullOrEmpty(str))
+                return string.Empty;
+            return str.Replace("\n", "").Replace("\r", "");
         }
 
         private void SendSerialBus(byte[] command)
