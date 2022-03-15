@@ -1,11 +1,17 @@
-﻿using System;
+﻿using System.Globalization;
+
 namespace Bev.Instruments.ND281
 {
     public class GenericResponse
     {
+        public GenericResponse(string textLine)
+        {
+            ParseInstrumentResponse(textLine);
+        }
+
         public GenericResponse()
         {
-            Reset();
+            InvalidateProperties();
         }
 
         public double Value { get; private set; }
@@ -15,21 +21,60 @@ namespace Bev.Instruments.ND281
         public Sorting SortingStatus { get; private set; }
         public MeasurementSeries SeriesStatus { get; private set; }
 
-        public void ParseInstrumentResponse(string response)
+        private void ParseInstrumentResponse(string response)
         {
-            Reset();
-            ResponseLine = RemoveCrLfFromString(response);
-
+            InvalidateProperties();
+            ResponseLine = StripCrLfFromString(response);
+            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
+            if (response.Length < 15)
+                return;
+            // parse the sign character
+            string sSign = ResponseLine.Substring(0, 1);
+            if (sSign == "-") Sign = Sign.Negative;
+            if (sSign == "+") Sign = Sign.Positive;
+            // parse the unit character
+            string sUnit = ResponseLine.Substring(12, 1);
+            if (sUnit == " ") MeasurementUnit = Unit.MM;
+            if (sUnit == "\"") MeasurementUnit = Unit.Inch;
+            if (sUnit == "G") MeasurementUnit = Unit.Degree;
+            if (sUnit == "M") MeasurementUnit = Unit.DMS;
+            if (sUnit == "R") MeasurementUnit = Unit.Rad;
+            if (sUnit == "?") MeasurementUnit = Unit.Fault;
+            // parse numerical value
+            string sValue = ResponseLine.Substring(1, 10);
+            if (!double.TryParse(sValue, out double value))
+                value = double.NaN;
+            Value = value * ConvertSignToDouble(Sign);
+            // parse sorting status (Klassierzustand)
+            string sSort = ResponseLine.Substring(13, 1);
+            if (sSort == "<") SortingStatus = Sorting.Below;
+            if (sSort == ">") SortingStatus = Sorting.Above;
+            if (sSort == "=") SortingStatus = Sorting.Inside;
+            if (sSort == "?") SortingStatus = Sorting.Fault;
+            // parse series status (Messreihe)
+            string sSeries = ResponseLine.Substring(14, 1);
+            if (sSeries == "A") SeriesStatus = MeasurementSeries.Actual;
+            if (sSeries == "S") SeriesStatus = MeasurementSeries.Min; 
+            if (sSeries == "G") SeriesStatus = MeasurementSeries.Max;
+            if (sSeries == "D") SeriesStatus = MeasurementSeries.Diff;
+            if (sSeries == " ") SeriesStatus = MeasurementSeries.Actual;
         }
 
-        private string RemoveCrLfFromString(string str)
+        private double ConvertSignToDouble(Sign sign)
+        {
+            if (sign == Sign.Positive) return 1;
+            if (sign == Sign.Negative) return -1;
+            return double.NaN;
+        }
+
+        private string StripCrLfFromString(string str)
         {
             if (string.IsNullOrEmpty(str))
                 return string.Empty;
             return str.Replace("\n", "").Replace("\r", "");
         }
 
-        private void Reset()
+        private void InvalidateProperties()
         {
             Value = double.NaN;
             ResponseLine = string.Empty;
@@ -37,6 +82,11 @@ namespace Bev.Instruments.ND281
             Sign = Sign.None;
             SortingStatus = Sorting.None;
             SeriesStatus = MeasurementSeries.None;
+        }
+
+        public override string ToString()
+        {
+            return $"[{GetType().Name}: ResponseLine=\"{ResponseLine}\" Value={Value} MeasurementUnit={MeasurementUnit} SortingStatus={SortingStatus} SeriesStatus={SeriesStatus}]";
         }
 
     }
@@ -63,9 +113,9 @@ namespace Bev.Instruments.ND281
     public enum Sorting // not for ND280 ?
     {
         None,
-        Greater,
-        Less,
-        Equal,
+        Above,
+        Below,
+        Inside,
         Fault
     }
 

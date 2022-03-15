@@ -16,39 +16,31 @@ namespace Bev.Instruments.ND281
 
         public ND281(string portName)
         {
-            LastResponse = string.Empty;
             DevicePort = portName.Trim();
             comPort = new SerialPort(DevicePort, 9600, Parity.Even, 7, StopBits.Two);
             comPort.Handshake = Handshake.RequestToSend;
             comPort.RtsEnable = true;
             comPort.DtrEnable = true;
+            LastResponse = new GenericResponse(); // invalidate all properties
         }
 
         public string DevicePort { get; }
         public string InstrumentManufacturer => "Heidenhain";
         public string InstrumentType => "ND281/ND280";
         public string InstrumentID => $"{InstrumentManufacturer} {InstrumentType} @ {DevicePort}";
-        public string LastResponse { get; private set; } // for debuging only, make private when working
+        public GenericResponse LastResponse { get; private set; }
+        public string LastResponseString => LastResponse.ResponseLine; // for debuging only, make private when working
 
         public double GetValue()
         {
-            LastResponse = Query();
-            return ParseResponse(LastResponse);
+            LastResponse = ParseTextLine(Query());
+            return LastResponse.Value;
         }
 
-        private double ParseResponse(string response)
+        private GenericResponse ParseTextLine(string textLine)
         {
-            CultureInfo.CurrentCulture = CultureInfo.InvariantCulture;
-            if (response.Length < 11) // actually 17?
-                return double.NaN;
-            double sign = 1;
-            string sSign = response.Substring(0, 1);
-            if (sSign == "-")
-                sign = -1;
-            string sValue = response.Substring(1, 10);
-            if (double.TryParse(sValue, out double value))
-                return sign * value;
-            return double.NaN;
+            var resp = new GenericResponse(textLine);
+            return resp;
         }
 
         private static byte CtrlB = 0x02;
@@ -60,21 +52,20 @@ namespace Bev.Instruments.ND281
         {
             OpenPort();
             Thread.Sleep(delayTime);    // TODO really?
-            SendSerialBus(GenericCommand());
+            SendSerialBus(GenerateGenericCommand());
             Thread.Sleep(delayTime);
             byte[] buffer = ReadSerialBus();
-            string str = Encoding.ASCII.GetString(buffer, 0, buffer.Length);
-            return RemoveCrLfFromString(str);
+            return Encoding.ASCII.GetString(buffer, 0, buffer.Length);
         }
 
-        private byte[] GenericCommand()
+        private byte[] GenerateGenericCommand()
         {
             byte[] command = new byte[1];
             command[0] = CtrlB;
             return command;
         }
 
-        private byte[] RemoteACommand()
+        private byte[] GenerateRemoteACommand()
         {
             byte[] command = new byte[7];
             command[0] = ESC;
@@ -85,13 +76,6 @@ namespace Bev.Instruments.ND281
             command[5] = 0x30;
             command[6] = CR;
             return command;
-        }
-
-        private string RemoveCrLfFromString(string str)
-        {
-            if (string.IsNullOrEmpty(str))
-                return string.Empty;
-            return str.Replace("\n", "").Replace("\r", "");
         }
 
         private void SendSerialBus(byte[] command)
