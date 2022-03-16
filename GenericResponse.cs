@@ -14,7 +14,8 @@ namespace Bev.Instruments.ND281
             InvalidateProperties();
         }
 
-        public double Value { get; private set; }
+        public double Value => ConvertToMm();
+        public double NumericalValue { get; private set; }
         public string ResponseLine { get; private set; }
         public Unit MeasurementUnit { get; private set; }
         public Sign Sign { get; private set; }
@@ -44,7 +45,7 @@ namespace Bev.Instruments.ND281
             string sValue = ResponseLine.Substring(1, 10);
             if (!double.TryParse(sValue, out double value))
                 value = double.NaN;
-            Value = value * ConvertSignToDouble(Sign);
+            NumericalValue = value * ConvertSignToDouble(Sign);
             // parse sorting status (Klassierzustand)
             string sSort = ResponseLine.Substring(13, 1);
             if (sSort == "<") SortingStatus = Sorting.Below;
@@ -67,6 +68,14 @@ namespace Bev.Instruments.ND281
             return double.NaN;
         }
 
+        // TODO include conversion for angle values
+        private double ConvertToMm()
+        {
+            if (MeasurementUnit == Unit.Inch)
+                return NumericalValue * 25.4;
+            return NumericalValue;
+        }
+
         private string StripCrLfFromString(string str)
         {
             if (string.IsNullOrEmpty(str))
@@ -76,7 +85,7 @@ namespace Bev.Instruments.ND281
 
         private void InvalidateProperties()
         {
-            Value = double.NaN;
+            NumericalValue = double.NaN;
             ResponseLine = string.Empty;
             MeasurementUnit = Unit.None;
             Sign = Sign.None;
@@ -86,7 +95,7 @@ namespace Bev.Instruments.ND281
 
         public override string ToString()
         {
-            return $"[{GetType().Name}: ResponseLine=\"{ResponseLine}\" Value={Value} MeasurementUnit={MeasurementUnit} SortingStatus={SortingStatus} SeriesStatus={SeriesStatus}]";
+            return $"[{GetType().Name}: ResponseLine=\"{ResponseLine}\" NumericalValue={NumericalValue} MeasurementUnit={MeasurementUnit} SortingStatus={SortingStatus} SeriesStatus={SeriesStatus}]";
         }
 
     }
