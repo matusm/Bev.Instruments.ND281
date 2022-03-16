@@ -95,7 +95,7 @@ namespace Bev.Instruments.ND281
 
         public override string ToString()
         {
-            return $"[{GetType().Name}: ResponseLine=\"{ResponseLine}\" NumericalValue={NumericalValue} MeasurementUnit={MeasurementUnit} SortingStatus={SortingStatus} SeriesStatus={SeriesStatus}]";
+            return $"[{GetType().Name}: ResponseLine=\"{ResponseLine}\" NumericalValue={NumericalValue} MeasurementUnit={MeasurementUnit}]";
         }
 
     }
