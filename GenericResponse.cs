@@ -1,6 +1,6 @@
 ﻿using System.Globalization;
 
-namespace Bev.Instruments.ND281
+namespace Bev.Instruments.Heidenhain
 {
     public class GenericResponse
     {

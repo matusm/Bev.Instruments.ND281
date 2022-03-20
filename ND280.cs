@@ -1,11 +1,11 @@
 ﻿
-namespace Bev.Instruments.ND281
+namespace Bev.Instruments.Heidenhain
 {
-    public class ND280 : ND281
+    public class ND280 : HeidenhainBase
     {
-        public ND280(string portName) : base(portName){}
+        public ND280(string portName) : base(portName) { }
+        public override string InstrumentType => "ND280";
 
-        public new string InstrumentType => "ND280";
 
         private static byte CtrlB = 0x02;
         private static byte CR = 0x13;
