@@ -5,10 +5,15 @@ namespace Bev.Instruments.Heidenhain
 {
     public static class Commander
     {
-        private static byte CtrlB = 0x02;
-        private static byte CR = 0x13;
-        private static byte LF = 0x10;
-        private static byte ESC = 0x1B;
+        private static char CtrlB = (char)0x02; //STX
+        private static char CtrlS = (char)0x13; //DC3
+        private static char CtrlQ = (char)0x11; //DC1
+        private static char CtrlE = (char)0x05; //ENQ
+        private static char CtrlF = (char)0x06; //ACK
+        private static char CtrlU = (char)0x15; //NAK
+        private static char CR = (char)0x0D;
+        private static char LF = (char)0x0A;
+        private static char ESC = (char)0x1B;
 
         public static byte[] ACommand(int cmd) => StringToBytes(BuildCommandString('A', cmd));
         public static byte[] TCommand(int cmd) => StringToBytes(BuildCommandString('T', cmd));
