@@ -33,6 +33,8 @@ namespace Bev.Instruments.Heidenhain
             string sSign = ResponseLine.Substring(0, 1);
             if (sSign == "-") Sign = Sign.Negative;
             if (sSign == "+") Sign = Sign.Positive;
+            // "  -19.28081    "
+            if (sSign == " ") Sign = Sign.Positive; // this is a hack for an old ND281B from BEV/E33
             // parse the unit character
             string sUnit = ResponseLine.Substring(12, 1);
             if (sUnit == " ") MeasurementUnit = Unit.MM;
