@@ -33,8 +33,11 @@ namespace Bev.Instruments.Heidenhain
             string sSign = ResponseLine.Substring(0, 1);
             if (sSign == "-") Sign = Sign.Negative;
             if (sSign == "+") Sign = Sign.Positive;
+            // at least for an ancient ND281B from BEV/E33 the minus sign
+            // is at a wrong string position:
             // "  -19.28081    "
-            if (sSign == " ") Sign = Sign.Positive; // this is a hack for an old ND281B from BEV/E33
+            // the following line is a hack to catch this situation
+            if (sSign == " ") Sign = Sign.Positive; 
             // parse the unit character
             string sUnit = ResponseLine.Substring(12, 1);
             if (sUnit == " ") MeasurementUnit = Unit.MM;
