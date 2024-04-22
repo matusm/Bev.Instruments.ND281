@@ -42,6 +42,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Commander.cs" />
+    <Compile Include="DummyND.cs" />
+    <Compile Include="IHeidenhain.cs" />
     <Compile Include="ND280.cs" />
     <Compile Include="HeidenhainBase.cs" />
     <Compile Include="ND281.cs" />

@@ -6,7 +6,7 @@ using System.Threading;
 namespace Bev.Instruments.Heidenhain
 {
     // Basic functionality to retrieve values from the Heidenhain NDxxx display family
-    public abstract class HeidenhainBase
+    public abstract class HeidenhainBase : IHeidenhain
     {
         protected readonly SerialPort comPort;
         protected static int delayTime = 200;     // delay time between send and read, in ms
